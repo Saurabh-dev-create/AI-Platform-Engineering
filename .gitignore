@@ -1,0 +1,70 @@
+# ============================================================
+# AI Agent Platform
+# ============================================================
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Kubernetes local credentials
+kubeconfig
+kubeconfig.*
+.kube/
+
+# Helm
+*.tgz
+
+# Node / Frontend
+node_modules/
+.next/
+coverage/
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
