@@ -5,9 +5,11 @@ from fastapi import FastAPI
 from app.api.router import api_router
 from app.config.logging import configure_logging, get_logger
 from app.config.settings import settings
-
-
+from app.middleware.correlation_id import CorrelationIDMiddleware
+from app.middleware.timing import TimingMiddleware
+from app.middleware.request_logger import RequestLoggingMiddleware
 configure_logging()
+from app.core.exceptions import register_exception_handlers
 
 logger = get_logger(__name__)
 
@@ -45,7 +47,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+register_exception_handlers(app)
 
+app.add_middleware(TimingMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(CorrelationIDMiddleware)
 app.include_router(api_router)
 
 

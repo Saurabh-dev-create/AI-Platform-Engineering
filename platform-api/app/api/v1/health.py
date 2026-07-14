@@ -74,10 +74,16 @@ def liveness() -> dict[str, str]:
     is running and capable of handling HTTP requests.
     """
 
+    logger.info(
+        "liveness_check_completed",
+        service="platform-api",
+    )
+
     return {
         "status": "alive",
         "service": "platform-api",
     }
+    
 
 
 @router.get("/ready")
@@ -167,3 +173,4 @@ def version() -> dict[str, str]:
         "version": settings.app_version,
         "environment": settings.app_env,
     }
+   
