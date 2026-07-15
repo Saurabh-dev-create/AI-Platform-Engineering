@@ -52,6 +52,29 @@ class ResourceNotFoundException(PlatformException):
         )
 
 
+class ResourceConflictException(PlatformException):
+    """
+    Raised when a platform resource conflicts with existing state.
+    """
+
+    def __init__(
+        self,
+        resource: str,
+        field: str,
+        value: str,
+    ) -> None:
+        super().__init__(
+            message=f"{resource} already exists",
+            error_code="RESOURCE_CONFLICT",
+            status_code=status.HTTP_409_CONFLICT,
+            details={
+                "resource": resource,
+                "field": field,
+                "value": value,
+            },
+        )
+
+
 class PolicyDeniedException(PlatformException):
     """
     Raised when platform governance denies an operation.
@@ -265,3 +288,28 @@ def register_exception_handlers(app: FastAPI) -> None:
         Exception,
         unexpected_exception_handler,
     )
+class AuthenticationFailedException(PlatformException):
+    """
+    Raised when platform authentication credentials cannot be trusted.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(
+            message="Invalid email or password",
+            error_code="AUTHENTICATION_FAILED",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            details={},
+        )
+        
+class InactiveUserException(PlatformException):
+    """
+    Raised when an inactive platform user attempts an authenticated action.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(
+            message="User account is inactive",
+            error_code="USER_INACTIVE",
+            status_code=status.HTTP_403_FORBIDDEN,
+            details={},
+        )

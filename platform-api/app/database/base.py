@@ -56,7 +56,4 @@ class TimestampMixin:
     )
 
 
-from app.models.project import Project  # noqa: E402, F401
-from app.models.team import Team  # noqa: E402, F401
-from app.models.team_membership import TeamMembership  # noqa: E402, F401
-from app.models.user import User  # noqa: E402, F401
+
