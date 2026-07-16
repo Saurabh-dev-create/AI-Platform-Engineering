@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
-from app.auth.dependencies import (
-    AuthenticatedIdentity,
-    get_authenticated_identity,
-)
-from app.auth.jwt import (
-    create_access_token,
-    create_refresh_token,
-)
+from app.auth.dependencies import get_current_user
+from app.dependencies.database import get_db_session
+from app.models.user import User
+from app.repositories.user_repository import UserRepository
 from app.schemas.auth import (
-    AuthenticatedIdentityResponse,
+    LoginRequest,
+    RegisterRequest,
     TokenResponse,
 )
+from app.schemas.user import UserResponse
+from app.services.auth_service import AuthService
 
 
 router = APIRouter(
@@ -21,43 +21,47 @@ router = APIRouter(
 
 
 @router.post(
-    "/foundation-token",
+    "/register",
+    response_model=UserResponse,
+    status_code=201,
+)
+def register_user(
+    registration: RegisterRequest,
+    db: Session = Depends(get_db_session),
+) -> UserResponse:
+    repository = UserRepository()
+    service = AuthService(repository)
+
+    user = service.register_user(
+        db,
+        registration,
+    )
+
+    return UserResponse.model_validate(user)
+
+
+@router.post(
+    "/login",
     response_model=TokenResponse,
 )
-def create_foundation_token() -> TokenResponse:
-    """
-    Issue temporary foundation tokens for authentication verification.
+def login_user(
+    login: LoginRequest,
+    db: Session = Depends(get_db_session),
+) -> TokenResponse:
+    repository = UserRepository()
+    service = AuthService(repository)
 
-    This endpoint will be removed when database-backed user login
-    is implemented.
-    """
-
-    foundation_user_id = "foundation-user"
-
-    return TokenResponse(
-        access_token=create_access_token(
-            subject=foundation_user_id,
-        ),
-        refresh_token=create_refresh_token(
-            subject=foundation_user_id,
-        ),
+    return service.login_user(
+        db,
+        login,
     )
 
 
 @router.get(
-    "/identity",
-    response_model=AuthenticatedIdentityResponse,
+    "/me",
+    response_model=UserResponse,
 )
-def read_authenticated_identity(
-    identity: AuthenticatedIdentity = Depends(
-        get_authenticated_identity
-    ),
-) -> AuthenticatedIdentityResponse:
-    """
-    Return the identity extracted from a valid access token.
-    """
-
-    return AuthenticatedIdentityResponse(
-        user_id=identity.user_id,
-        token_id=identity.token_id,
-    )
+def read_current_user(
+    current_user: User = Depends(get_current_user),
+) -> UserResponse:
+    return UserResponse.model_validate(current_user)
