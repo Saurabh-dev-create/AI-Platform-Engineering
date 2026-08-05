@@ -1,9 +1,9 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
 
+import { ProtectedRoute } from "../features/auth/ProtectedRoute";
 import { AppLayout } from "../layouts/AppLayout";
 import { DashboardPage } from "../pages/DashboardPage";
 import { LoginPage } from "../pages/LoginPage";
-
 import {
   AgentsPage,
   ApprovalsPage,
@@ -17,7 +17,6 @@ import {
   UsagePage,
 } from "../pages/PlaceholderPages";
 
-
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -28,48 +27,53 @@ export const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-    path: "/app",
-    element: <AppLayout />,
+    element: <ProtectedRoute />,
     children: [
       {
-        index: true,
-        element: <Navigate to="/app/dashboard" replace />,
-      },
-      {
-        path: "dashboard",
-        element: <DashboardPage />,
-      },
-      {
-        path: "projects",
-        element: <ProjectsPage />,
-      },
-      {
-        path: "agents",
-        element: <AgentsPage />,
-      },
-      {
-        path: "deployments",
-        element: <DeploymentsPage />,
-      },
-      {
-        path: "approvals",
-        element: <ApprovalsPage />,
-      },
-      {
-        path: "usage",
-        element: <UsagePage />,
-      },
-      {
-        path: "observability",
-        element: <ObservabilityPage />,
-      },
-      {
-        path: "governance",
-        element: <GovernancePage />,
-      },
-      {
-        path: "marketplace",
-        element: <MarketplacePage />,
+        path: "/app",
+        element: <AppLayout />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="/app/dashboard" replace />,
+          },
+          {
+            path: "dashboard",
+            element: <DashboardPage />,
+          },
+          {
+            path: "projects",
+            element: <ProjectsPage />,
+          },
+          {
+            path: "agents",
+            element: <AgentsPage />,
+          },
+          {
+            path: "deployments",
+            element: <DeploymentsPage />,
+          },
+          {
+            path: "approvals",
+            element: <ApprovalsPage />,
+          },
+          {
+            path: "usage",
+            element: <UsagePage />,
+          },
+          {
+            path: "observability",
+            element: <ObservabilityPage />,
+          },
+          {
+            path: "governance",
+            element: <GovernancePage />,
+          },
+          {
+            path: "marketplace",
+            element: <MarketplacePage />,
+          },
+        ],
       },
     ],
   },
