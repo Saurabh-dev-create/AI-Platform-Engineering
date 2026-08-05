@@ -4,6 +4,7 @@ import { ProtectedRoute } from "../features/auth/ProtectedRoute";
 import { AppLayout } from "../layouts/AppLayout";
 import { DashboardPage } from "../pages/DashboardPage";
 import { LoginPage } from "../pages/LoginPage";
+import { ProjectsPage } from "../pages/ProjectsPage";
 import {
   AgentsPage,
   ApprovalsPage,
@@ -13,7 +14,6 @@ import {
   MarketplacePage,
   NotFoundPage,
   ObservabilityPage,
-  ProjectsPage,
   UsagePage,
 } from "../pages/PlaceholderPages";
 
