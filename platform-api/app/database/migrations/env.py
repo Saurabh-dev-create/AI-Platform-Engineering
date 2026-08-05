@@ -10,7 +10,7 @@ from app.models.team import Team  # noqa: E402, F401
 from app.models.team_membership import TeamMembership  # noqa: E402, F401
 from app.models.user import User  # noqa: E402, F401
 from app.models.agent import Agent  # noqa: F401
-
+from app.models.agent_version import AgentVersion  # noqa: E402, F401
 config = context.config
 
 config.set_main_option(
