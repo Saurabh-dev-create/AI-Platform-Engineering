@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 
 import { clearAccessToken } from "../features/auth/auth-session";
+import { useWorkspace } from "../features/workspaces/use-workspace";
 
 const navigationItems = [
   { label: "Overview", to: "/app/dashboard" },
@@ -21,6 +22,12 @@ const navigationItems = [
 export function AppLayout() {
   const navigate = useNavigate();
 
+  const {
+    currentWorkspace,
+    isLoading: isWorkspaceLoading,
+    isError: isWorkspaceError,
+  } = useWorkspace();
+
   function handleLogout() {
     clearAccessToken();
 
@@ -30,6 +37,16 @@ export function AppLayout() {
         replace: true,
       },
     );
+  }
+
+  let workspaceLabel = "Create workspace";
+
+  if (isWorkspaceLoading) {
+    workspaceLabel = "Loading workspace...";
+  } else if (isWorkspaceError) {
+    workspaceLabel = "Workspace unavailable";
+  } else if (currentWorkspace) {
+    workspaceLabel = currentWorkspace.name;
   }
 
   return (
@@ -77,7 +94,9 @@ export function AppLayout() {
         <header className="app-topbar">
           <div>
             <div className="topbar-context">Workspace</div>
-            <div className="topbar-workspace">Zevinq Labs</div>
+            <div className="topbar-workspace">
+              {workspaceLabel}
+            </div>
           </div>
 
           <div className="topbar-actions">
