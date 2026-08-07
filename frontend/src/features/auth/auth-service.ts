@@ -49,3 +49,23 @@ export async function getCurrentUser(
     },
   );
 }
+
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  full_name: string;
+}
+
+
+export async function register(
+  registration: RegisterRequest,
+): Promise<CurrentUser> {
+  return apiRequest<CurrentUser>(
+    "/auth/register",
+    {
+      method: "POST",
+      body: JSON.stringify(registration),
+    },
+  );
+}

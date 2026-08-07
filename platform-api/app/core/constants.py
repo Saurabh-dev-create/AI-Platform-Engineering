@@ -39,3 +39,9 @@ class DeploymentStrategy(StrEnum):
     ROLLING = "rolling"
     CANARY = "canary"
     BLUE_GREEN = "blue_green"
+
+
+class PlanType(StrEnum):
+    FREE = "free"
+    PRO = "pro"
+    ENTERPRISE = "enterprise"

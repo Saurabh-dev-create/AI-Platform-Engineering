@@ -46,7 +46,7 @@ class UserRepository:
         )
 
         db.add(user)
-        db.commit()
+        db.flush()
         db.refresh(user)
 
         return user

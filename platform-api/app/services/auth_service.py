@@ -30,7 +30,7 @@ class AuthService:
     ) -> None:
         self.user_repository = user_repository
 
-    def register_user(
+    def provision_user(
         self,
         db: Session,
         registration: RegisterRequest,
@@ -58,7 +58,28 @@ class AuthService:
             email=normalized_email,
             password_hash=password_hash,
             full_name=registration.full_name.strip(),
+        )
+
+    def register_user(
+        self,
+        db: Session,
+        registration: RegisterRequest,
+    ) -> User:
+        try:
+            user = self.provision_user(
+                db,
+                registration,
             )
+
+            db.commit()
+            db.refresh(user)
+
+            return user
+
+        except Exception:
+            db.rollback()
+            raise
+
     def login_user(
         self,
         db: Session,

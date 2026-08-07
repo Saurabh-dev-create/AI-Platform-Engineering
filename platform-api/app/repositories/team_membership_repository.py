@@ -88,6 +88,25 @@ class TeamMembershipRepository:
     ) -> None:
         db.delete(membership)
         db.flush()
+
+    def count_for_team(
+        self,
+        db: Session,
+        *,
+        team_id: UUID,
+    ) -> int:
+        statement = (
+            select(func.count())
+            .select_from(TeamMembership)
+            .where(
+                TeamMembership.team_id == team_id,
+            )
+        )
+
+        return int(
+            db.scalar(statement) or 0
+        )
+
     def count_for_team_by_role(
         self,
         db: Session,

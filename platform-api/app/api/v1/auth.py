@@ -5,6 +5,13 @@ from app.auth.dependencies import get_current_user
 from app.dependencies.database import get_db_session
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
+from app.repositories.team_entitlement_repository import (
+    TeamEntitlementRepository,
+)
+from app.repositories.team_membership_repository import (
+    TeamMembershipRepository,
+)
+from app.repositories.team_repository import TeamRepository
 from app.schemas.auth import (
     LoginRequest,
     RegisterRequest,
@@ -12,6 +19,11 @@ from app.schemas.auth import (
 )
 from app.schemas.user import UserResponse
 from app.services.auth_service import AuthService
+from app.services.entitlement_service import EntitlementService
+from app.services.self_service_onboarding_service import (
+    SelfServiceOnboardingService,
+)
+from app.services.team_service import TeamService
 
 
 router = APIRouter(
@@ -29,10 +41,27 @@ def register_user(
     registration: RegisterRequest,
     db: Session = Depends(get_db_session),
 ) -> UserResponse:
-    repository = UserRepository()
-    service = AuthService(repository)
+    entitlement_service = EntitlementService(
+        TeamEntitlementRepository(),
+    )
 
-    user = service.register_user(
+    auth_service = AuthService(
+        UserRepository(),
+    )
+
+    team_service = TeamService(
+        TeamRepository(),
+        TeamMembershipRepository(),
+        entitlement_service,
+    )
+
+    onboarding_service = SelfServiceOnboardingService(
+        auth_service,
+        team_service,
+        entitlement_service,
+    )
+
+    user = onboarding_service.register_free_user(
         db,
         registration,
     )

@@ -1,4 +1,6 @@
-from sqlalchemy import Boolean, String
+from uuid import UUID
+
+from sqlalchemy import Boolean, ForeignKey, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base, TimestampMixin, UUIDMixin
@@ -33,6 +35,16 @@ class Team(
     description: Mapped[str | None] = mapped_column(
         String(1000),
         nullable=True,
+    )
+
+    created_by_user_id: Mapped[UUID | None] = mapped_column(
+        Uuid,
+        ForeignKey(
+            "users.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+        index=True,
     )
 
     is_active: Mapped[bool] = mapped_column(

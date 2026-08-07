@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.constants import AgentStatus
@@ -77,6 +77,29 @@ class AgentRepository:
 
         return list(
             db.scalars(statement).all()
+        )
+
+
+    def count_for_team(
+        self,
+        db: Session,
+        *,
+        team_id: UUID,
+    ) -> int:
+        statement = (
+            select(func.count())
+            .select_from(Agent)
+            .join(
+                Project,
+                Project.id == Agent.project_id,
+            )
+            .where(
+                Project.team_id == team_id,
+            )
+        )
+
+        return int(
+            db.scalar(statement) or 0
         )
 
     def create(

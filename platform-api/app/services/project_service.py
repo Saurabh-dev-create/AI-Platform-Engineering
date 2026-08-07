@@ -17,6 +17,7 @@ from app.repositories.team_membership_repository import (
 )
 from app.repositories.team_repository import TeamRepository
 from app.schemas.project import ProjectCreate
+from app.services.entitlement_service import EntitlementService
 
 
 class ProjectService:
@@ -29,10 +30,12 @@ class ProjectService:
         project_repository: ProjectRepository,
         team_repository: TeamRepository,
         membership_repository: TeamMembershipRepository,
+        entitlement_service: EntitlementService,
     ) -> None:
         self.project_repository = project_repository
         self.team_repository = team_repository
         self.membership_repository = membership_repository
+        self.entitlement_service = entitlement_service
 
     def _require_team_member(
         self,
@@ -102,6 +105,23 @@ class ProjectService:
             db,
             team_id=team_id,
             current_user=current_user,
+        )
+
+        entitlement = self.entitlement_service.require_for_team(
+            db,
+            team_id=team_id,
+        )
+
+        current_projects = (
+            self.project_repository.count_for_team(
+                db,
+                team_id=team_id,
+            )
+        )
+
+        self.entitlement_service.require_project_capacity(
+            entitlement,
+            current_projects=current_projects,
         )
 
         normalized_name = project_data.name.strip()

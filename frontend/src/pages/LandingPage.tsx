@@ -84,18 +84,18 @@ export function LandingPage() {
 
           <div className="landing-hero-actions">
             <Link
-              to="/login"
-              className="landing-primary-action"
-            >
-              Open Console
-            </Link>
+          to="/register"
+          className="landing-primary-action"
+        >
+          Create Free Account
+        </Link>
 
-            <a
-              href="#platform"
-              className="landing-secondary-action"
-            >
-              Explore Platform
-            </a>
+            <Link
+          to="/login"
+          className="landing-secondary-action"
+        >
+          Open Console
+        </Link>
           </div>
 
           <div className="landing-proof">
@@ -245,12 +245,21 @@ export function LandingPage() {
           </h2>
         </div>
 
-        <Link
-          to="/login"
-          className="landing-primary-action"
-        >
-          Open Zevinq Console
-        </Link>
+        <div className="landing-hero-actions">
+      <Link
+        to="/register"
+        className="landing-primary-action"
+      >
+        Create Free Account
+      </Link>
+
+      <Link
+        to="/login"
+        className="landing-secondary-action"
+      >
+        Sign in
+      </Link>
+    </div>
       </section>
 
       <footer className="landing-footer">

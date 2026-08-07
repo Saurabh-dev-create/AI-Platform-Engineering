@@ -42,6 +42,7 @@ class TeamResponse(BaseModel):
     name: str
     slug: str
     description: str | None
+    created_by_user_id: UUID | None
     is_active: bool
     created_at: datetime
     updated_at: datetime

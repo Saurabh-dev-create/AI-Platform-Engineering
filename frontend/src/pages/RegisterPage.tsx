@@ -2,11 +2,15 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
 
 import {
   getCurrentUser,
   login,
+  register,
 } from "../features/auth/auth-service";
 import {
   clearAccessToken,
@@ -15,13 +19,16 @@ import {
 import { ApiError } from "../services/api-client";
 
 
-export function LoginPage() {
+export function RegisterPage() {
   const navigate = useNavigate();
 
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] =
+    useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -33,8 +40,16 @@ export function LoginPage() {
     clearAccessToken();
 
     try {
+      const normalizedEmail = email.trim();
+
+      await register({
+        full_name: fullName.trim(),
+        email: normalizedEmail,
+        password,
+      });
+
       const tokens = await login({
-        email: email.trim(),
+        email: normalizedEmail,
         password,
       });
 
@@ -59,12 +74,10 @@ export function LoginPage() {
       setPassword("");
 
       if (error instanceof ApiError) {
-        setErrorMessage(
-          error.message,
-        );
+        setErrorMessage(error.message);
       } else {
         setErrorMessage(
-          "Unable to sign in. Please try again.",
+          "Unable to create your account. Please try again.",
         );
       }
     } finally {
@@ -97,34 +110,34 @@ export function LoginPage() {
           </p>
 
           <h1>
-            Operate AI agents
-            <span> with confidence.</span>
+            Start building
+            <span> with Zevinq.</span>
           </h1>
 
           <p>
-            Register, version, deploy, govern, and observe
-            enterprise AI agents from one control plane.
+            Create your free workspace to register,
+            manage, version, and govern AI agents.
           </p>
 
           <div className="login-capabilities">
             <div>
               <span className="capability-dot" />
-              Agent Registry
+              1 Workspace
             </div>
 
             <div>
               <span className="capability-dot" />
-              Version Control
+              Up to 2 Projects
             </div>
 
             <div>
               <span className="capability-dot" />
-              Deployment Governance
+              Up to 3 AI Agents
             </div>
 
             <div>
               <span className="capability-dot" />
-              Token & Cost Visibility
+              No paid runtime usage
             </div>
           </div>
         </div>
@@ -138,15 +151,16 @@ export function LoginPage() {
         <div className="login-card">
           <div className="login-card-heading">
             <p className="login-card-eyebrow">
-              Welcome back
+              Free workspace
             </p>
 
             <h2>
-              Sign in to Zevinq
+              Create your Zevinq account
             </h2>
 
             <p>
-              Access your AI agent platform workspace.
+              Get started with the Zevinq AI Agent
+              Control Plane.
             </p>
           </div>
 
@@ -154,6 +168,23 @@ export function LoginPage() {
             className="login-form"
             onSubmit={handleSubmit}
           >
+            <label>
+              <span>Full name</span>
+
+              <input
+                type="text"
+                name="fullName"
+                placeholder="Your name"
+                autoComplete="name"
+                value={fullName}
+                onChange={(event) =>
+                  setFullName(event.target.value)
+                }
+                disabled={isSubmitting}
+                required
+              />
+            </label>
+
             <label>
               <span>Email address</span>
 
@@ -177,8 +208,9 @@ export function LoginPage() {
               <input
                 type="password"
                 name="password"
-                placeholder="Enter your password"
-                autoComplete="current-password"
+                placeholder="Create a password"
+                autoComplete="new-password"
+                minLength={8}
                 value={password}
                 onChange={(event) =>
                   setPassword(event.target.value)
@@ -188,19 +220,10 @@ export function LoginPage() {
               />
             </label>
 
-            <div className="login-form-meta">
-              <span className="remember-field">
-                Session-only authentication
-              </span>
-
-              <button
-                type="button"
-                className="forgot-password"
-                disabled
-              >
-                Forgot password?
-              </button>
-            </div>
+            <p className="remember-field">
+              Minimum 8 characters with at least
+              one number and one special character.
+            </p>
 
             {errorMessage ? (
               <p
@@ -217,28 +240,19 @@ export function LoginPage() {
               disabled={isSubmitting}
             >
               {isSubmitting
-                ? "Signing in..."
-                : "Sign in"}
+                ? "Creating workspace..."
+                : "Create Free Account"}
             </button>
           </form>
 
           <div className="login-security-note">
-            <span className="security-dot" />
-
             <span>
-              Secure authentication powered by Zevinq Platform API
-            </span>
-          </div>
-
-          <div className="login-security-note">
-            <span>
-              New to Zevinq?{" "}
-              <Link to="/register">
-                Create Free Account
+              Already have an account?{" "}
+              <Link to="/login">
+                Sign in
               </Link>
             </span>
           </div>
-
         </div>
       </section>
     </main>

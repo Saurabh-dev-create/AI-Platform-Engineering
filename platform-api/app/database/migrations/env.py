@@ -7,6 +7,7 @@ from app.config.settings import settings
 from app.database.base import Base
 from app.models.project import Project  # noqa: E402, F401
 from app.models.team import Team  # noqa: E402, F401
+from app.models.team_entitlement import TeamEntitlement  # noqa: E402, F401
 from app.models.team_membership import TeamMembership  # noqa: E402, F401
 from app.models.user import User  # noqa: E402, F401
 from app.models.agent import Agent  # noqa: F401

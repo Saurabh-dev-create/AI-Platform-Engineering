@@ -20,6 +20,7 @@ from app.schemas.team_membership import (
     TeamMemberAdd,
     TeamMemberRoleUpdate,
 )
+from app.services.entitlement_service import EntitlementService
 
 
 class TeamMembershipService:
@@ -32,10 +33,12 @@ class TeamMembershipService:
         team_repository: TeamRepository,
         membership_repository: TeamMembershipRepository,
         user_repository: UserRepository,
+        entitlement_service: EntitlementService,
     ) -> None:
         self.team_repository = team_repository
         self.membership_repository = membership_repository
         self.user_repository = user_repository
+        self.entitlement_service = entitlement_service
 
     def _require_team_admin(
         self,
@@ -86,6 +89,23 @@ class TeamMembershipService:
             db,
             team_id=team_id,
             current_user=current_user,
+        )
+
+        entitlement = self.entitlement_service.require_for_team(
+            db,
+            team_id=team_id,
+        )
+
+        current_members = (
+            self.membership_repository.count_for_team(
+                db,
+                team_id=team_id,
+            )
+        )
+
+        self.entitlement_service.require_member_capacity(
+            entitlement,
+            current_members=current_members,
         )
 
         normalized_email = member_data.email.lower()

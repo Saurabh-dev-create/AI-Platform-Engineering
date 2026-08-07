@@ -17,6 +17,7 @@ from app.repositories.team_membership_repository import (
     TeamMembershipRepository,
 )
 from app.schemas.agent import AgentCreate
+from app.services.entitlement_service import EntitlementService
 
 
 class AgentService:
@@ -29,10 +30,12 @@ class AgentService:
         agent_repository: AgentRepository,
         project_repository: ProjectRepository,
         membership_repository: TeamMembershipRepository,
+        entitlement_service: EntitlementService,
     ) -> None:
         self.agent_repository = agent_repository
         self.project_repository = project_repository
         self.membership_repository = membership_repository
+        self.entitlement_service = entitlement_service
 
     def _require_project_access(
         self,
@@ -74,7 +77,7 @@ class AgentService:
         project_id: UUID,
         current_user: User,
     ) -> None:
-        _, role = self._require_project_access(
+        project, role = self._require_project_access(
             db,
             project_id=project_id,
             current_user=current_user,
@@ -89,6 +92,21 @@ class AgentService:
                 error_code="AGENT_CREATE_FORBIDDEN",
                 status_code=403,
             )
+
+        entitlement = self.entitlement_service.require_for_team(
+            db,
+            team_id=project.team_id,
+        )
+
+        current_agents = self.agent_repository.count_for_team(
+            db,
+            team_id=project.team_id,
+        )
+
+        self.entitlement_service.require_agent_capacity(
+            entitlement,
+            current_agents=current_agents,
+        )
 
     def create_agent(
         self,

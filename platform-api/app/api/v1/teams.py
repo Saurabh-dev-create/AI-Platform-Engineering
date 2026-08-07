@@ -7,6 +7,9 @@ from app.models.user import User
 from app.repositories.team_membership_repository import (
     TeamMembershipRepository,
 )
+from app.repositories.team_entitlement_repository import (
+    TeamEntitlementRepository,
+)
 from app.repositories.team_repository import TeamRepository
 from app.schemas.team import TeamCreate, TeamResponse
 from app.services.team_service import TeamService
@@ -22,6 +25,7 @@ from app.schemas.team_membership import (
 from app.services.team_membership_service import (
     TeamMembershipService,
 )
+from app.services.entitlement_service import EntitlementService
 
 router = APIRouter(
     prefix="/teams",
@@ -42,6 +46,9 @@ def create_team(
     service = TeamService(
         TeamRepository(),
         TeamMembershipRepository(),
+        EntitlementService(
+            TeamEntitlementRepository(),
+        ),
     )
 
     team = service.create_team(
@@ -83,6 +90,9 @@ def get_team(
     service = TeamService(
         TeamRepository(),
         TeamMembershipRepository(),
+        EntitlementService(
+            TeamEntitlementRepository(),
+        ),
     )
 
     team = service.get_team_for_user(
@@ -107,6 +117,9 @@ def add_team_member(
         TeamRepository(),
         TeamMembershipRepository(),
         UserRepository(),
+        EntitlementService(
+            TeamEntitlementRepository(),
+        ),
     )
 
     membership = service.add_member(
@@ -132,6 +145,9 @@ def list_team_members(
         TeamRepository(),
         TeamMembershipRepository(),
         UserRepository(),
+        EntitlementService(
+            TeamEntitlementRepository(),
+        ),
     )
 
     memberships = service.list_members(
@@ -161,6 +177,9 @@ def update_team_member_role(
         TeamRepository(),
         TeamMembershipRepository(),
         UserRepository(),
+        EntitlementService(
+            TeamEntitlementRepository(),
+        ),
     )
 
     membership = service.update_member_role(
@@ -188,6 +207,9 @@ def remove_team_member(
         TeamRepository(),
         TeamMembershipRepository(),
         UserRepository(),
+        EntitlementService(
+            TeamEntitlementRepository(),
+        ),
     )
 
     service.remove_member(

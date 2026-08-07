@@ -11,8 +11,12 @@ from app.repositories.project_repository import ProjectRepository
 from app.repositories.team_membership_repository import (
     TeamMembershipRepository,
 )
+from app.repositories.team_entitlement_repository import (
+    TeamEntitlementRepository,
+)
 from app.schemas.agent import AgentCreate, AgentResponse
 from app.services.agent_service import AgentService
+from app.services.entitlement_service import EntitlementService
 
 
 router = APIRouter(
@@ -25,6 +29,9 @@ def build_agent_service() -> AgentService:
         AgentRepository(),
         ProjectRepository(),
         TeamMembershipRepository(),
+        EntitlementService(
+            TeamEntitlementRepository(),
+        ),
     )
 
 

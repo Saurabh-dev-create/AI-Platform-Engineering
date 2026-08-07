@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.team import Team
@@ -59,6 +59,45 @@ class TeamRepository:
             db.scalars(statement).all()
         )
 
+
+
+    def list_owned_by_user(
+        self,
+        db: Session,
+        *,
+        user_id: UUID,
+    ) -> list[Team]:
+        statement = (
+            select(Team)
+            .where(
+                Team.created_by_user_id == user_id,
+                Team.is_active.is_(True),
+            )
+            .order_by(Team.created_at)
+        )
+
+        return list(
+            db.scalars(statement).all()
+        )
+
+    def count_owned_by_user(
+        self,
+        db: Session,
+        *,
+        user_id: UUID,
+    ) -> int:
+        statement = (
+            select(func.count())
+            .select_from(Team)
+            .where(
+                Team.created_by_user_id == user_id,
+            )
+        )
+
+        return int(
+            db.scalar(statement) or 0
+        )
+
     def create(
         self,
         db: Session,
@@ -66,11 +105,13 @@ class TeamRepository:
         name: str,
         slug: str,
         description: str | None,
+        created_by_user_id: UUID,
     ) -> Team:
         team = Team(
             name=name,
             slug=slug,
             description=description,
+            created_by_user_id=created_by_user_id,
         )
 
         db.add(team)
