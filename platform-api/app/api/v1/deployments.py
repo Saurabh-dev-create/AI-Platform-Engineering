@@ -16,6 +16,7 @@ from app.repositories.team_membership_repository import (
 from app.schemas.deployment import (
     DeploymentCreate,
     DeploymentResponse,
+    DeploymentTransition,
 )
 from app.services.deployment_service import DeploymentService
 
@@ -97,3 +98,26 @@ def list_deployments_for_version(
         DeploymentResponse.model_validate(deployment)
         for deployment in deployments
     ]
+
+
+@router.post(
+    "/deployments/{deployment_id}/transition",
+    response_model=DeploymentResponse,
+)
+def transition_deployment(
+    deployment_id: UUID,
+    transition_data: DeploymentTransition,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db_session),
+) -> DeploymentResponse:
+    service = build_deployment_service()
+
+    deployment = service.transition_status(
+        db,
+        deployment_id=deployment_id,
+        target_status=transition_data.status,
+        current_user=current_user,
+        failure_reason=transition_data.failure_reason,
+    )
+
+    return DeploymentResponse.model_validate(deployment)

@@ -45,3 +45,15 @@ class DeploymentResponse(BaseModel):
 
     created_at: datetime
     updated_at: datetime
+
+
+class DeploymentTransition(BaseModel):
+    """
+    Request schema for transitioning a deployment lifecycle state.
+
+    The service layer remains responsible for validating whether the
+    requested transition is legal for the deployment's current state.
+    """
+
+    status: DeploymentStatus
+    failure_reason: str | None = None

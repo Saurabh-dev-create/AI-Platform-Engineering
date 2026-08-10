@@ -228,6 +228,38 @@ class DeploymentService:
             current_user=current_user,
         )
 
+        _, role = self._require_version_access(
+            db,
+            version_id=deployment.agent_version_id,
+            current_user=current_user,
+        )
+
+        if role not in {
+            TeamRole.TEAM_ADMIN,
+            TeamRole.DEVELOPER,
+        }:
+            raise PlatformException(
+                message=(
+                    "Deployment lifecycle changes require "
+                    "team_admin or developer role"
+                ),
+                error_code="DEPLOYMENT_TRANSITION_FORBIDDEN",
+                status_code=403,
+            )
+
+        if (
+            target_status == DeploymentStatus.APPROVED
+            and role != TeamRole.TEAM_ADMIN
+        ):
+            raise PlatformException(
+                message=(
+                    "Approving a deployment requires "
+                    "team_admin role"
+                ),
+                error_code="DEPLOYMENT_APPROVAL_FORBIDDEN",
+                status_code=403,
+            )
+
         allowed_targets = self.ALLOWED_TRANSITIONS.get(
             deployment.status,
             set(),
@@ -244,30 +276,36 @@ class DeploymentService:
                 status_code=409,
             )
 
-        if (
-            target_status == DeploymentStatus.FAILED
-            and not failure_reason
-        ):
-            raise PlatformException(
-                message=(
-                    "A failure reason is required when "
-                    "marking a deployment as failed"
-                ),
-                error_code="DEPLOYMENT_FAILURE_REASON_REQUIRED",
-                status_code=409,
-            )
-
         normalized_failure_reason = (
             failure_reason.strip()
             if failure_reason is not None
             else None
         )
 
+        if (
+            target_status == DeploymentStatus.FAILED
+            and not normalized_failure_reason
+        ):
+            raise PlatformException(
+                message=(
+                    "A non-empty failure reason is required when "
+                    "marking a deployment as failed"
+                ),
+                error_code="DEPLOYMENT_FAILURE_REASON_REQUIRED",
+                status_code=409,
+            )
+
+        next_failure_reason = (
+            normalized_failure_reason
+            if target_status == DeploymentStatus.FAILED
+            else deployment.failure_reason
+        )
+
         deployment = self.deployment_repository.update_status(
             db,
             deployment=deployment,
             status=target_status,
-            failure_reason=normalized_failure_reason,
+            failure_reason=next_failure_reason,
         )
 
         db.commit()
