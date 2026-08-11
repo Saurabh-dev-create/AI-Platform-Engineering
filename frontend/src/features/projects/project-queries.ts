@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { listProjects } from "./project-service";
+import { getProject, listProjects } from "./project-service";
 
 export const projectQueryKeys = {
   all: ["projects"] as const,
   byWorkspace: (workspaceId: string) =>
-    [...projectQueryKeys.all, workspaceId] as const,
+    [...projectQueryKeys.all, "workspace", workspaceId] as const,
+
+  detail: (projectId: string) =>
+    [...projectQueryKeys.all, "detail", projectId] as const,
 };
 
 export function useProjects(
@@ -23,5 +26,26 @@ export function useProjects(
       return listProjects(workspaceId);
     },
     enabled: Boolean(workspaceId),
+  });
+}
+
+
+export function useProject(
+  projectId: string | null,
+) {
+  return useQuery({
+    queryKey: projectId
+      ? projectQueryKeys.detail(projectId)
+      : projectQueryKeys.all,
+
+    queryFn: () => {
+      if (!projectId) {
+        throw new Error("Project ID is required");
+      }
+
+      return getProject(projectId);
+    },
+
+    enabled: Boolean(projectId),
   });
 }

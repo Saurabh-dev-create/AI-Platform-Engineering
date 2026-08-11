@@ -1,22 +1,31 @@
 import { apiRequest } from "../../services/api-client";
 import { getAccessToken } from "../auth/auth-session";
 
-export interface Project {
+
+export type AgentStatus =
+  | "draft"
+  | "active"
+  | "archived";
+
+
+export interface Agent {
   id: string;
-  team_id: string;
+  project_id: string;
   name: string;
   slug: string;
   description: string | null;
-  is_active: boolean;
+  status: AgentStatus;
   created_at: string;
   updated_at: string;
 }
 
-export interface CreateProjectRequest {
+
+export interface CreateAgentRequest {
   name: string;
   slug: string;
   description: string | null;
 }
+
 
 function requireAccessToken(): string {
   const accessToken = getAccessToken();
@@ -28,27 +37,14 @@ function requireAccessToken(): string {
   return accessToken;
 }
 
-export async function listProjects(
-  workspaceId: string,
-): Promise<Project[]> {
-  const accessToken = requireAccessToken();
 
-  return apiRequest<Project[]>(
-    `/teams/${workspaceId}/projects`,
-    {
-      method: "GET",
-      accessToken,
-    },
-  );
-}
-
-export async function getProject(
+export async function listAgents(
   projectId: string,
-): Promise<Project> {
+): Promise<Agent[]> {
   const accessToken = requireAccessToken();
 
-  return apiRequest<Project>(
-    `/projects/${projectId}`,
+  return apiRequest<Agent[]>(
+    `/projects/${projectId}/agents`,
     {
       method: "GET",
       accessToken,
@@ -57,18 +53,33 @@ export async function getProject(
 }
 
 
-export async function createProject(
-  workspaceId: string,
-  project: CreateProjectRequest,
-): Promise<Project> {
+export async function getAgent(
+  agentId: string,
+): Promise<Agent> {
   const accessToken = requireAccessToken();
 
-  return apiRequest<Project>(
-    `/teams/${workspaceId}/projects`,
+  return apiRequest<Agent>(
+    `/agents/${agentId}`,
+    {
+      method: "GET",
+      accessToken,
+    },
+  );
+}
+
+
+export async function createAgent(
+  projectId: string,
+  agent: CreateAgentRequest,
+): Promise<Agent> {
+  const accessToken = requireAccessToken();
+
+  return apiRequest<Agent>(
+    `/projects/${projectId}/agents`,
     {
       method: "POST",
       accessToken,
-      body: JSON.stringify(project),
+      body: JSON.stringify(agent),
     },
   );
 }

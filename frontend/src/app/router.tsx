@@ -6,6 +6,7 @@ import { DashboardPage } from "../pages/DashboardPage";
 import { LandingPage } from "../pages/LandingPage";
 import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
+import { ProjectDetailPage } from "../pages/ProjectDetailPage";
 import { ProjectsPage } from "../pages/ProjectsPage";
 import {
   AgentsPage,
@@ -49,6 +50,10 @@ export const router = createBrowserRouter([
           {
             path: "projects",
             element: <ProjectsPage />,
+          },
+          {
+            path: "projects/:projectId",
+            element: <ProjectDetailPage />,
           },
           {
             path: "agents",

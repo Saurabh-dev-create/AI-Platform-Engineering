@@ -3,12 +3,13 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
-import { useCreateProject } from "../features/projects/project-mutations";
-import { useProjects } from "../features/projects/project-queries";
-import { useWorkspace } from "../features/workspaces/use-workspace";
+import { useCreateAgent } from "../features/agents/agent-mutations";
+import { useAgents } from "../features/agents/agent-queries";
+import { useProject } from "../features/projects/project-queries";
 import { ApiError } from "../services/api-client";
+
 
 function createSlug(value: string): string {
   return value
@@ -18,22 +19,23 @@ function createSlug(value: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export function ProjectsPage() {
-  const {
-    currentWorkspace,
-    isLoading: isWorkspaceLoading,
-    isError: isWorkspaceError,
-  } = useWorkspace();
+
+export function ProjectDetailPage() {
+  const { projectId } = useParams();
 
   const {
-    data: projects = [],
-    isLoading: isProjectsLoading,
-    isError: isProjectsError,
-  } = useProjects(
-    currentWorkspace?.id ?? null,
-  );
+    data: project,
+    isLoading: isProjectLoading,
+    isError: isProjectError,
+  } = useProject(projectId ?? null);
 
-  const createProjectMutation = useCreateProject();
+  const {
+    data: agents = [],
+    isLoading: isAgentsLoading,
+    isError: isAgentsError,
+  } = useAgents(projectId ?? null);
+
+  const createAgentMutation = useCreateAgent();
 
   const [isCreateFormOpen, setIsCreateFormOpen] =
     useState(false);
@@ -62,43 +64,40 @@ export function ProjectsPage() {
     setName(value);
 
     if (!isSlugEdited) {
-      setSlug(
-        createSlug(value),
-      );
+      setSlug(createSlug(value));
     }
   }
 
-  async function handleCreateProject(
+  async function handleCreateAgent(
     event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
 
-    if (!currentWorkspace) {
+    if (!projectId) {
       return;
     }
 
     const normalizedName = name.trim();
 
     if (!normalizedName) {
-      setFormError("Project name is required.");
+      setFormError("Agent name is required.");
       return;
     }
 
     if (!normalizedSlug) {
-      setFormError("Project slug is required.");
+      setFormError("Agent slug is required.");
       return;
     }
 
     setFormError(null);
 
     try {
-      await createProjectMutation.mutateAsync({
-        workspaceId: currentWorkspace.id,
-        project: {
+      await createAgentMutation.mutateAsync({
+        projectId,
+        agent: {
           name: normalizedName,
           slug: normalizedSlug,
-          description:
-            description.trim() || null,
+          description: description.trim() || null,
         },
       });
 
@@ -109,78 +108,44 @@ export function ProjectsPage() {
         setFormError(error.message);
       } else {
         setFormError(
-          "Unable to create project. Please try again.",
+          "Unable to register agent. Please try again.",
         );
       }
     }
   }
 
-  if (isWorkspaceLoading) {
+  if (isProjectLoading || isAgentsLoading) {
     return (
       <section className="page-section">
-        <p>Loading workspace...</p>
+        <p>Loading project...</p>
       </section>
     );
   }
 
-  if (isWorkspaceError) {
+  if (isProjectError || !project) {
     return (
       <section className="page-section">
-        <p>Unable to load workspace.</p>
-      </section>
-    );
-  }
-
-  if (!currentWorkspace) {
-    return (
-      <section className="page-section">
-        <div className="page-heading">
-          <div>
-            <p className="page-eyebrow">
-              Projects
-            </p>
-
-            <h1>Create your first workspace</h1>
-
-            <p>
-              Projects belong to a workspace. Create a workspace
-              before registering projects and AI agents.
-            </p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (isProjectsLoading) {
-    return (
-      <section className="page-section">
-        <p>Loading projects...</p>
-      </section>
-    );
-  }
-
-  if (isProjectsError) {
-    return (
-      <section className="page-section">
-        <p>Unable to load projects.</p>
+        <p>Unable to load project.</p>
       </section>
     );
   }
 
   return (
     <section className="page-section">
+      <div className="project-detail-breadcrumb">
+        <Link to="/app/projects">Projects</Link>
+        <span>/</span>
+        <span>{project.name}</span>
+      </div>
+
       <div className="page-heading">
         <div>
-          <p className="page-eyebrow">
-            Projects
-          </p>
+          <p className="page-eyebrow">Project</p>
 
-          <h1>{currentWorkspace.name} Projects</h1>
+          <h1>{project.name}</h1>
 
           <p>
-            Organize AI agents, deployments, usage, and governance
-            within this workspace.
+            Register and manage AI agents within this project.
           </p>
         </div>
 
@@ -194,17 +159,36 @@ export function ProjectsPage() {
         >
           {isCreateFormOpen
             ? "Cancel"
-            : "Create Project"}
+            : "Register Agent"}
         </button>
+      </div>
+
+      <div className="project-detail-summary">
+        <div>
+          <span>Project slug</span>
+          <strong>{project.slug}</strong>
+        </div>
+
+        <div>
+          <span>Status</span>
+          <strong>
+            {project.is_active ? "Active" : "Inactive"}
+          </strong>
+        </div>
+
+        <div>
+          <span>Agents</span>
+          <strong>{agents.length}</strong>
+        </div>
       </div>
 
       {isCreateFormOpen ? (
         <form
           className="project-create-form"
-          onSubmit={handleCreateProject}
+          onSubmit={handleCreateAgent}
         >
           <label>
-            <span>Project name</span>
+            <span>Agent name</span>
 
             <input
               type="text"
@@ -213,7 +197,7 @@ export function ProjectsPage() {
                 handleNameChange(event.target.value)
               }
               maxLength={255}
-              disabled={createProjectMutation.isPending}
+              disabled={createAgentMutation.isPending}
               required
             />
           </label>
@@ -230,7 +214,7 @@ export function ProjectsPage() {
               }}
               pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
               maxLength={100}
-              disabled={createProjectMutation.isPending}
+              disabled={createAgentMutation.isPending}
               required
             />
           </label>
@@ -244,62 +228,67 @@ export function ProjectsPage() {
                 setDescription(event.target.value)
               }
               maxLength={1000}
-              disabled={createProjectMutation.isPending}
+              disabled={createAgentMutation.isPending}
             />
           </label>
 
           {formError ? (
-            <p role="alert">
-              {formError}
-            </p>
+            <p role="alert">{formError}</p>
           ) : null}
 
           <button
             type="submit"
             className="topbar-button"
-            disabled={createProjectMutation.isPending}
+            disabled={createAgentMutation.isPending}
           >
-            {createProjectMutation.isPending
-              ? "Creating..."
-              : "Create Project"}
+            {createAgentMutation.isPending
+              ? "Registering..."
+              : "Register Agent"}
           </button>
         </form>
       ) : null}
 
-      {projects.length === 0 ? (
-        <div className="empty-state">
-          <h2>No projects yet</h2>
+      <div className="resource-section-heading">
+        <div>
+          <p className="page-eyebrow">Agents</p>
+          <h2>Registered Agents</h2>
+        </div>
+      </div>
 
+      {isAgentsError ? (
+        <p>Unable to load agents.</p>
+      ) : agents.length === 0 ? (
+        <div className="empty-state">
+          <h2>No agents yet</h2>
           <p>
-            Create a project to start registering and managing AI agents.
+            Register your first AI agent to begin creating
+            versioned configurations and deployments.
           </p>
         </div>
       ) : (
         <div className="project-grid">
-          {projects.map((project) => (
+          {agents.map((agent) => (
             <Link
-              key={project.id}
-              to={`/app/projects/${project.id}`}
+              key={agent.id}
               className="project-card project-card-link"
+              to={`/app/agents/${agent.id}`}
             >
               <div className="project-card-header">
                 <div>
                   <p className="project-slug">
-                    {project.slug}
+                    {agent.slug}
                   </p>
 
-                  <h2>{project.name}</h2>
+                  <h2>{agent.name}</h2>
                 </div>
 
                 <span className="project-status">
-                  {project.is_active
-                    ? "Active"
-                    : "Inactive"}
+                  {agent.status}
                 </span>
               </div>
 
               <p className="project-description">
-                {project.description
+                {agent.description
                   ?? "No description provided."}
               </p>
             </Link>
