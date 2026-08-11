@@ -9,6 +9,12 @@ import {
   useDeprecateAgentVersion,
   usePublishAgentVersion,
 } from "../features/agent-versions/agent-version-mutations";
+import { useCreateDeployment } from "../features/deployments/deployment-mutations";
+import { useDeploymentsForVersion } from "../features/deployments/deployment-queries";
+import {
+  type DeploymentEnvironment,
+  type DeploymentStrategy,
+} from "../features/deployments/deployment-service";
 import { useAgentVersions } from "../features/agent-versions/agent-version-queries";
 import { useAgent } from "../features/agents/agent-queries";
 import { ApiError } from "../services/api-client";
@@ -59,6 +65,25 @@ export function AgentDetailPage() {
 
   const [versionActionError, setVersionActionError] =
     useState<string | null>(null);
+
+  const createDeploymentMutation =
+    useCreateDeployment();
+
+  const [deploymentVersionId, setDeploymentVersionId] =
+    useState<string | null>(null);
+
+  const [deploymentEnvironment, setDeploymentEnvironment] =
+    useState<DeploymentEnvironment>("development");
+
+  const [deploymentStrategy, setDeploymentStrategy] =
+    useState<DeploymentStrategy>("rolling");
+
+  const [deploymentError, setDeploymentError] =
+    useState<string | null>(null);
+
+  const {
+    data: selectedVersionDeployments = [],
+  } = useDeploymentsForVersion(deploymentVersionId);
 
   const [isCreateVersionOpen, setIsCreateVersionOpen] =
     useState(false);
@@ -162,6 +187,31 @@ export function AgentDetailPage() {
       } else {
         setVersionActionError(
           "Unable to publish agent version.",
+        );
+      }
+    }
+  }
+
+
+  async function handleCreateDeployment(
+    versionId: string,
+  ) {
+    setDeploymentError(null);
+
+    try {
+      await createDeploymentMutation.mutateAsync({
+        agent_version_id: versionId,
+        environment: deploymentEnvironment,
+        strategy: deploymentStrategy,
+      });
+
+      setDeploymentVersionId(versionId);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setDeploymentError(error.message);
+      } else {
+        setDeploymentError(
+          "Unable to create deployment.",
         );
       }
     }
@@ -437,21 +487,152 @@ export function AgentDetailPage() {
                 ) : null}
 
                 {version.status === "published" ? (
-                  <button
-                    type="button"
-                    className="secondary-button"
-                    disabled={
-                      publishVersionMutation.isPending
-                      || deprecateVersionMutation.isPending
-                    }
-                    onClick={() =>
-                      void handleDeprecateVersion(version.id)
-                    }
-                  >
-                    Deprecate
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      className="topbar-button"
+                      disabled={
+                        publishVersionMutation.isPending
+                        || deprecateVersionMutation.isPending
+                        || createDeploymentMutation.isPending
+                      }
+                      onClick={() => {
+                        setDeploymentError(null);
+
+                        setDeploymentVersionId((current) =>
+                          current === version.id
+                            ? null
+                            : version.id
+                        );
+                      }}
+                    >
+                      {deploymentVersionId === version.id
+                        ? "Cancel Deploy"
+                        : "Deploy"}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      disabled={
+                        publishVersionMutation.isPending
+                        || deprecateVersionMutation.isPending
+                        || createDeploymentMutation.isPending
+                      }
+                      onClick={() =>
+                        void handleDeprecateVersion(version.id)
+                      }
+                    >
+                      Deprecate
+                    </button>
+                  </>
                 ) : null}
               </div>
+
+              {deploymentVersionId === version.id ? (
+                <div className="deployment-create-panel">
+                  <label>
+                    <span>Environment</span>
+
+                    <select
+                      value={deploymentEnvironment}
+                      onChange={(event) =>
+                        setDeploymentEnvironment(
+                          event.target.value as DeploymentEnvironment,
+                        )
+                      }
+                      disabled={createDeploymentMutation.isPending}
+                    >
+                      <option value="development">
+                        Development
+                      </option>
+
+                      <option value="staging">
+                        Staging
+                      </option>
+
+                      <option value="production">
+                        Production
+                      </option>
+                    </select>
+                  </label>
+
+                  <label>
+                    <span>Strategy</span>
+
+                    <select
+                      value={deploymentStrategy}
+                      onChange={(event) =>
+                        setDeploymentStrategy(
+                          event.target.value as DeploymentStrategy,
+                        )
+                      }
+                      disabled={createDeploymentMutation.isPending}
+                    >
+                      <option value="rolling">
+                        Rolling
+                      </option>
+
+                      <option value="blue_green">
+                        Blue-green
+                      </option>
+
+                      <option value="canary">
+                        Canary
+                      </option>
+                    </select>
+                  </label>
+
+                  {deploymentError ? (
+                    <p
+                      className="agent-version-form-error"
+                      role="alert"
+                    >
+                      {deploymentError}
+                    </p>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    className="topbar-button"
+                    disabled={createDeploymentMutation.isPending}
+                    onClick={() =>
+                      void handleCreateDeployment(version.id)
+                    }
+                  >
+                    {createDeploymentMutation.isPending
+                      ? "Creating..."
+                      : "Create Deployment"}
+                  </button>
+
+                  {selectedVersionDeployments.length > 0 ? (
+                    <div className="deployment-history">
+                      <span>Deployments</span>
+
+                      {selectedVersionDeployments.map(
+                        (deployment) => (
+                          <div
+                            key={deployment.id}
+                            className="deployment-history-item"
+                          >
+                            <strong>
+                              {deployment.environment}
+                            </strong>
+
+                            <span>
+                              {deployment.strategy}
+                            </span>
+
+                            <span>
+                              {deployment.status}
+                            </span>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </article>
           ))}
         </div>

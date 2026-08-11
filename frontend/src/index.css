@@ -2251,3 +2251,91 @@ ol {
   gap: 10px;
   margin-top: 16px;
 }
+
+
+/* =========================================================
+   Agent Version Deployment
+   ========================================================= */
+
+.deployment-create-panel {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: rgba(5, 10, 20, 0.55);
+}
+
+.deployment-create-panel label {
+  display: grid;
+  gap: 8px;
+}
+
+.deployment-create-panel label > span,
+.deployment-history > span {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.deployment-create-panel select {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  outline: none;
+  background: rgba(5, 10, 20, 0.8);
+  color: var(--color-text-primary);
+}
+
+.deployment-create-panel select:focus {
+  border-color: var(--color-brand);
+}
+
+.deployment-create-panel > .topbar-button,
+.deployment-create-panel > .agent-version-form-error,
+.deployment-history {
+  grid-column: 1 / -1;
+}
+
+.deployment-history {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.deployment-history-item {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.deployment-history-item strong {
+  color: var(--color-text-primary);
+}
+
+
+@media (max-width: 900px) {
+  .deployment-create-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .deployment-create-panel > .topbar-button,
+  .deployment-create-panel > .agent-version-form-error,
+  .deployment-history {
+    grid-column: 1;
+  }
+
+  .deployment-history-item {
+    grid-template-columns: 1fr;
+  }
+}
