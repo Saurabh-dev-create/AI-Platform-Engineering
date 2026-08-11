@@ -2,6 +2,7 @@ import { Navigate, createBrowserRouter } from "react-router-dom";
 
 import { ProtectedRoute } from "../features/auth/ProtectedRoute";
 import { AppLayout } from "../layouts/AppLayout";
+import { AgentDetailPage } from "../pages/AgentDetailPage";
 import { DashboardPage } from "../pages/DashboardPage";
 import { LandingPage } from "../pages/LandingPage";
 import { LoginPage } from "../pages/LoginPage";
@@ -58,6 +59,10 @@ export const router = createBrowserRouter([
           {
             path: "agents",
             element: <AgentsPage />,
+          },
+          {
+            path: "agents/:agentId",
+            element: <AgentDetailPage />,
           },
           {
             path: "deployments",

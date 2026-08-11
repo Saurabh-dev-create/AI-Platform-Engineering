@@ -2131,3 +2131,123 @@ ol {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =========================================================
+   Agent Version Form
+   ========================================================= */
+
+.resource-section-heading > .topbar-button {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0 18px;
+  border-color: rgba(139, 92, 246, 0.45);
+  background:
+    linear-gradient(
+      90deg,
+      var(--color-brand-strong),
+      var(--color-brand)
+    );
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.resource-section-heading > .topbar-button:hover {
+  color: white;
+  filter: brightness(1.08);
+}
+
+.agent-version-form {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: rgba(12, 19, 34, 0.62);
+  box-shadow: var(--shadow-panel);
+}
+
+.agent-version-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.agent-version-form label > span {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.agent-version-form textarea {
+  min-height: 130px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  outline: none;
+  resize: vertical;
+  background: rgba(5, 10, 20, 0.7);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.agent-version-form textarea:focus {
+  border-color: var(--color-brand);
+}
+
+.agent-version-form-wide {
+  grid-column: 1 / -1;
+}
+
+.agent-version-form-error {
+  grid-column: 1 / -1;
+  color: var(--color-danger);
+  font-size: 12px;
+}
+
+.agent-version-form > .topbar-button {
+  grid-column: 1 / -1;
+  justify-self: flex-start;
+  min-height: 40px;
+  padding: 0 18px;
+  border-color: rgba(139, 92, 246, 0.45);
+  background:
+    linear-gradient(
+      90deg,
+      var(--color-brand-strong),
+      var(--color-brand)
+    );
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.agent-version-form > .topbar-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+
+@media (max-width: 900px) {
+  .agent-version-form {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-version-form-wide,
+  .agent-version-form-error,
+  .agent-version-form > .topbar-button {
+    grid-column: 1;
+  }
+}
+
+
+.agent-version-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
