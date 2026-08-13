@@ -2339,3 +2339,51 @@ ol {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =========================================================
+   Deployment Approvals
+   ========================================================= */
+
+.approval-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.approval-card {
+  cursor: default;
+}
+
+.approval-detail-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.approval-detail-grid > div {
+  display: grid;
+  gap: 6px;
+}
+
+.approval-detail-grid span {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.approval-detail-grid strong {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: 12px;
+  text-overflow: ellipsis;
+}
+
+
+@media (max-width: 900px) {
+  .approval-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

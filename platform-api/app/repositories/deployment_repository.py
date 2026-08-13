@@ -83,6 +83,47 @@ class DeploymentRepository:
             db.scalars(statement).all()
         )
 
+    def list_pending_approvals_for_user(
+        self,
+        db: Session,
+        *,
+        user_id: UUID,
+    ) -> list[Deployment]:
+        """
+        Return pending deployment approvals visible to the user
+        through their team memberships.
+        """
+
+        statement = (
+            select(Deployment)
+            .join(
+                AgentVersion,
+                AgentVersion.id == Deployment.agent_version_id,
+            )
+            .join(
+                Agent,
+                Agent.id == AgentVersion.agent_id,
+            )
+            .join(
+                Project,
+                Project.id == Agent.project_id,
+            )
+            .join(
+                TeamMembership,
+                TeamMembership.team_id == Project.team_id,
+            )
+            .where(
+                TeamMembership.user_id == user_id,
+                Deployment.status
+                == DeploymentStatus.PENDING_APPROVAL,
+            )
+            .order_by(Deployment.created_at)
+        )
+
+        return list(
+            db.scalars(statement).all()
+        )
+
     def create(
         self,
         db: Session,

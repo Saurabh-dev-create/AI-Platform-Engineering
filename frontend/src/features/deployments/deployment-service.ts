@@ -107,3 +107,16 @@ export async function transitionDeployment(
     },
   );
 }
+
+
+export async function listPendingApprovals(): Promise<Deployment[]> {
+  const accessToken = requireAccessToken();
+
+  return apiRequest<Deployment[]>(
+    "/deployments/approvals",
+    {
+      method: "GET",
+      accessToken,
+    },
+  );
+}

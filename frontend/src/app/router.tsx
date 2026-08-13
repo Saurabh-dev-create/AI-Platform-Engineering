@@ -3,6 +3,7 @@ import { Navigate, createBrowserRouter } from "react-router-dom";
 import { ProtectedRoute } from "../features/auth/ProtectedRoute";
 import { AppLayout } from "../layouts/AppLayout";
 import { AgentDetailPage } from "../pages/AgentDetailPage";
+import { ApprovalsPage } from "../pages/ApprovalsPage";
 import { DashboardPage } from "../pages/DashboardPage";
 import { LandingPage } from "../pages/LandingPage";
 import { LoginPage } from "../pages/LoginPage";
@@ -11,7 +12,6 @@ import { ProjectDetailPage } from "../pages/ProjectDetailPage";
 import { ProjectsPage } from "../pages/ProjectsPage";
 import {
   AgentsPage,
-  ApprovalsPage,
   DeploymentsPage,
   GovernancePage,
   MarketplacePage,

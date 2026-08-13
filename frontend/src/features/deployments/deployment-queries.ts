@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import {
   listDeploymentsForVersion,
+  listPendingApprovals,
 } from "./deployment-service";
 
 
@@ -10,6 +11,9 @@ export const deploymentQueryKeys = {
 
   byVersion: (versionId: string) =>
     [...deploymentQueryKeys.all, "version", versionId] as const,
+
+  approvals: () =>
+    [...deploymentQueryKeys.all, "approvals"] as const,
 };
 
 
@@ -30,5 +34,13 @@ export function useDeploymentsForVersion(
     },
 
     enabled: Boolean(versionId),
+  });
+}
+
+
+export function usePendingApprovals() {
+  return useQuery({
+    queryKey: deploymentQueryKeys.approvals(),
+    queryFn: listPendingApprovals,
   });
 }

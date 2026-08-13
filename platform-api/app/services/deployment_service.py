@@ -213,6 +213,25 @@ class DeploymentService:
             agent_version_id=version_id,
         )
 
+    def list_pending_approvals(
+        self,
+        db: Session,
+        *,
+        current_user: User,
+    ) -> list[Deployment]:
+        """
+        Return deployments currently waiting for approval
+        that are visible through the user's team memberships.
+        """
+
+        return (
+            self.deployment_repository
+            .list_pending_approvals_for_user(
+                db,
+                user_id=current_user.id,
+            )
+        )
+
     def transition_status(
         self,
         db: Session,

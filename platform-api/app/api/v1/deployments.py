@@ -58,6 +58,27 @@ def create_deployment(
 
 
 @router.get(
+    "/deployments/approvals",
+    response_model=list[DeploymentResponse],
+)
+def list_pending_approvals(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db_session),
+) -> list[DeploymentResponse]:
+    service = build_deployment_service()
+
+    deployments = service.list_pending_approvals(
+        db,
+        current_user=current_user,
+    )
+
+    return [
+        DeploymentResponse.model_validate(deployment)
+        for deployment in deployments
+    ]
+
+
+@router.get(
     "/deployments/{deployment_id}",
     response_model=DeploymentResponse,
 )
