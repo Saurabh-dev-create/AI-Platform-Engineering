@@ -9,7 +9,10 @@ import {
   useDeprecateAgentVersion,
   usePublishAgentVersion,
 } from "../features/agent-versions/agent-version-mutations";
-import { useCreateDeployment } from "../features/deployments/deployment-mutations";
+import {
+  useCreateDeployment,
+  useTransitionDeployment,
+} from "../features/deployments/deployment-mutations";
 import { useDeploymentsForVersion } from "../features/deployments/deployment-queries";
 import {
   type DeploymentEnvironment,
@@ -68,6 +71,9 @@ export function AgentDetailPage() {
 
   const createDeploymentMutation =
     useCreateDeployment();
+
+  const transitionDeploymentMutation =
+    useTransitionDeployment();
 
   const [deploymentVersionId, setDeploymentVersionId] =
     useState<string | null>(null);
@@ -212,6 +218,32 @@ export function AgentDetailPage() {
       } else {
         setDeploymentError(
           "Unable to create deployment.",
+        );
+      }
+    }
+  }
+
+
+  async function handleRequestApproval(
+    deploymentId: string,
+    versionId: string,
+  ) {
+    setDeploymentError(null);
+
+    try {
+      await transitionDeploymentMutation.mutateAsync({
+        deploymentId,
+        versionId,
+        transition: {
+          status: "pending_approval",
+        },
+      });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setDeploymentError(error.message);
+      } else {
+        setDeploymentError(
+          "Unable to request deployment approval.",
         );
       }
     }
@@ -626,6 +658,26 @@ export function AgentDetailPage() {
                             <span>
                               {deployment.status}
                             </span>
+
+                            {deployment.status === "requested" ? (
+                              <button
+                                type="button"
+                                className="secondary-button"
+                                disabled={
+                                  transitionDeploymentMutation.isPending
+                                }
+                                onClick={() =>
+                                  void handleRequestApproval(
+                                    deployment.id,
+                                    version.id,
+                                  )
+                                }
+                              >
+                                {transitionDeploymentMutation.isPending
+                                  ? "Requesting..."
+                                  : "Request Approval"}
+                              </button>
+                            ) : null}
                           </div>
                         ),
                       )}

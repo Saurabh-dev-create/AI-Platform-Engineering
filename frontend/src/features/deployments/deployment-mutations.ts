@@ -5,7 +5,9 @@ import {
 
 import {
   createDeployment,
+  transitionDeployment,
   type CreateDeploymentRequest,
+  type TransitionDeploymentRequest,
 } from "./deployment-service";
 import {
   deploymentQueryKeys,
@@ -25,6 +27,38 @@ export function useCreateDeployment() {
         queryKey:
           deploymentQueryKeys.byVersion(
             deployment.agent_version_id,
+          ),
+      });
+    },
+  });
+}
+
+
+interface TransitionDeploymentVariables {
+  deploymentId: string;
+  versionId: string;
+  transition: TransitionDeploymentRequest;
+}
+
+
+export function useTransitionDeployment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      deploymentId,
+      transition,
+    }: TransitionDeploymentVariables) =>
+      transitionDeployment(
+        deploymentId,
+        transition,
+      ),
+
+    onSuccess: async (_deployment, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey:
+          deploymentQueryKeys.byVersion(
+            variables.versionId,
           ),
       });
     },

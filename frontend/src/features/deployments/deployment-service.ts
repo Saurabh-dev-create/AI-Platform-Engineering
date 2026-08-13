@@ -84,3 +84,26 @@ export async function listDeploymentsForVersion(
     },
   );
 }
+
+
+export interface TransitionDeploymentRequest {
+  status: DeploymentStatus;
+  failure_reason?: string | null;
+}
+
+
+export async function transitionDeployment(
+  deploymentId: string,
+  transition: TransitionDeploymentRequest,
+): Promise<Deployment> {
+  const accessToken = requireAccessToken();
+
+  return apiRequest<Deployment>(
+    `/deployments/${deploymentId}/transition`,
+    {
+      method: "POST",
+      accessToken,
+      body: JSON.stringify(transition),
+    },
+  );
+}
