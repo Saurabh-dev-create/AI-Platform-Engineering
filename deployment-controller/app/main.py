@@ -35,13 +35,40 @@ def main() -> None:
     logger.info(
         "deployment_controller_started "
         "poll_interval_seconds=%s "
-        "batch_size=%s",
+        "batch_size=%s "
+        "stale_after_seconds=%s",
         settings.poll_interval_seconds,
         settings.batch_size,
+        settings.stale_after_seconds,
     )
 
     while True:
         processed = 0
+
+        with SessionLocal() as db:
+            try:
+                stale_ids = repository.fail_stale_deploying(
+                    db,
+                    stale_after_seconds=(
+                        settings.stale_after_seconds
+                    ),
+                    limit=settings.batch_size,
+                )
+
+                db.commit()
+
+                for deployment_id in stale_ids:
+                    logger.warning(
+                        "stale_deployment_failed "
+                        "deployment_id=%s",
+                        deployment_id,
+                    )
+            except Exception:
+                db.rollback()
+
+                logger.exception(
+                    "stale_deployment_recovery_failed"
+                )
 
         for _ in range(settings.batch_size):
             with SessionLocal() as db:

@@ -118,3 +118,64 @@ class DeploymentRepository:
                 "failure_reason": failure_reason,
             },
         )
+
+
+    def fail_stale_deploying(
+        self,
+        db: Session,
+        *,
+        stale_after_seconds: int,
+        limit: int = 20,
+    ) -> list[UUID]:
+        """
+        Mark stale deploying records as failed.
+
+        The controller deliberately does not automatically retry these
+        deployments because external runtime execution may already have
+        partially succeeded.
+        """
+
+        statement = text(
+            """
+            WITH stale_deployments AS (
+                SELECT id
+                FROM deployments
+                WHERE
+                    status = 'deploying'
+                    AND updated_at < (
+                        NOW()
+                        - (
+                            CAST(
+                                :stale_after_seconds AS INTEGER
+                            )
+                            * INTERVAL '1 second'
+                        )
+                    )
+                ORDER BY updated_at
+                FOR UPDATE SKIP LOCKED
+                LIMIT :limit
+            )
+            UPDATE deployments AS deployment
+            SET
+                status = 'failed',
+                failure_reason = (
+                    'Deployment controller timed out while '
+                    'waiting for runtime completion'
+                ),
+                updated_at = NOW()
+            FROM stale_deployments
+            WHERE deployment.id = stale_deployments.id
+            RETURNING deployment.id
+            """
+        )
+
+        rows = db.execute(
+            statement,
+            {
+                "stale_after_seconds":
+                    stale_after_seconds,
+                "limit": limit,
+            },
+        ).scalars().all()
+
+        return list(rows)

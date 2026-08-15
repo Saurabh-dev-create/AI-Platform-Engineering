@@ -63,6 +63,14 @@ class Settings(BaseSettings):
         ),
     )
 
+    stale_after_seconds: int = Field(
+        default=300,
+        ge=30,
+        validation_alias=(
+            "DEPLOYMENT_CONTROLLER_STALE_AFTER_SECONDS"
+        ),
+    )
+
     @computed_field
     @property
     def database_url(self) -> str:
