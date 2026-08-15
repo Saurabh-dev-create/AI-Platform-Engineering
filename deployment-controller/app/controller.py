@@ -3,7 +3,10 @@ import logging
 from sqlalchemy.orm import Session
 
 from app.repository import DeploymentRepository
-from app.runtime import RuntimeAdapter
+from app.runtime import (
+    RuntimeAdapter,
+    RuntimeStatus,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +51,24 @@ class DeploymentController:
         )
 
         try:
-            self.runtime.deploy(deployment)
+            instance = self.runtime.materialize(
+                deployment
+            )
+
+            instance = self.runtime.start(
+                deployment,
+                instance,
+            )
+
+            observed = self.runtime.observe(
+                instance
+            )
+
+            if observed.status != RuntimeStatus.RUNNING:
+                raise RuntimeError(
+                    "Runtime did not reach running state: "
+                    f"{observed.status}"
+                )
         except Exception as exc:
             logger.exception(
                 "deployment_runtime_failed deployment_id=%s",
