@@ -5,7 +5,7 @@ from app.config import settings
 from app.controller import DeploymentController
 from app.database import SessionLocal
 from app.repository import DeploymentRepository
-from app.runtime import SimulatedRuntime
+from app.runtime_factory import build_runtime
 
 
 logging.basicConfig(
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 def main() -> None:
     repository = DeploymentRepository()
-    runtime = SimulatedRuntime()
+    runtime = build_runtime(settings.runtime)
 
     controller = DeploymentController(
         repository,
@@ -36,10 +36,12 @@ def main() -> None:
         "deployment_controller_started "
         "poll_interval_seconds=%s "
         "batch_size=%s "
-        "stale_after_seconds=%s",
+        "stale_after_seconds=%s "
+        "runtime=%s",
         settings.poll_interval_seconds,
         settings.batch_size,
         settings.stale_after_seconds,
+        settings.runtime,
     )
 
     while True:

@@ -1,4 +1,5 @@
 import logging
+from abc import ABC, abstractmethod
 
 from app.repository import ClaimedDeployment
 
@@ -6,12 +7,34 @@ from app.repository import ClaimedDeployment
 logger = logging.getLogger(__name__)
 
 
-class SimulatedRuntime:
+class RuntimeAdapter(ABC):
     """
-    Initial runtime adapter for validating controller reconciliation.
+    Execution boundary used by the deployment controller.
 
-    This adapter intentionally performs no external deployment yet.
-    It will later be replaced by Kubernetes/GitOps runtime adapters.
+    Runtime implementations are responsible for materializing
+    an approved deployment into an actual runtime environment.
+    """
+
+    @abstractmethod
+    def deploy(
+        self,
+        deployment: ClaimedDeployment,
+    ) -> None:
+        """
+        Execute the deployment.
+
+        Raise an exception when runtime execution fails.
+        """
+        raise NotImplementedError
+
+
+class SimulatedRuntime(RuntimeAdapter):
+    """
+    Initial runtime adapter used to validate controller reconciliation.
+
+    This implementation intentionally performs no external deployment.
+    It will later be replaced by concrete runtime adapters such as
+    KubernetesRuntime.
     """
 
     def deploy(

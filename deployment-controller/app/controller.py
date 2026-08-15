@@ -3,7 +3,7 @@ import logging
 from sqlalchemy.orm import Session
 
 from app.repository import DeploymentRepository
-from app.runtime import SimulatedRuntime
+from app.runtime import RuntimeAdapter
 
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class DeploymentController:
     def __init__(
         self,
         repository: DeploymentRepository,
-        runtime: SimulatedRuntime,
+        runtime: RuntimeAdapter,
     ) -> None:
         self.repository = repository
         self.runtime = runtime

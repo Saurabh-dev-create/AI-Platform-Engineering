@@ -62,6 +62,9 @@ services:
     env_file:
       - .env
 
+    environment:
+      DEPLOYMENT_RUNTIME: simulated
+
     depends_on:
       postgres:
         condition: service_healthy

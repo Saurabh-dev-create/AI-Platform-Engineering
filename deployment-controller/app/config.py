@@ -71,6 +71,11 @@ class Settings(BaseSettings):
         ),
     )
 
+    runtime: str = Field(
+        default="simulated",
+        validation_alias="DEPLOYMENT_RUNTIME",
+    )
+
     @computed_field
     @property
     def database_url(self) -> str:
