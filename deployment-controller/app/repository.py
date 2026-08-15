@@ -9,8 +9,14 @@ from sqlalchemy.orm import Session
 class ClaimedDeployment:
     id: UUID
     agent_version_id: UUID
+    agent_id: UUID
+    version_number: int
     environment: str
     strategy: str
+    model_config: dict
+    prompt_template: str | None
+    runtime_config: dict
+    tool_config: dict
     requested_by_user_id: UUID | None
 
 
@@ -29,25 +35,42 @@ class DeploymentRepository:
         statement = text(
             """
             WITH next_deployment AS (
-                SELECT id
-                FROM deployments
-                WHERE status = 'approved'
-                ORDER BY created_at
+                SELECT deployment.id
+                FROM deployments AS deployment
+                WHERE deployment.status = 'approved'
+                ORDER BY deployment.created_at
                 FOR UPDATE SKIP LOCKED
                 LIMIT 1
+            ),
+            claimed_deployment AS (
+                UPDATE deployments AS deployment
+                SET
+                    status = 'deploying',
+                    updated_at = NOW()
+                FROM next_deployment
+                WHERE deployment.id = next_deployment.id
+                RETURNING
+                    deployment.id,
+                    deployment.agent_version_id,
+                    deployment.environment,
+                    deployment.strategy,
+                    deployment.requested_by_user_id
             )
-            UPDATE deployments AS deployment
-            SET
-                status = 'deploying',
-                updated_at = NOW()
-            FROM next_deployment
-            WHERE deployment.id = next_deployment.id
-            RETURNING
-                deployment.id,
-                deployment.agent_version_id,
-                deployment.environment,
-                deployment.strategy,
-                deployment.requested_by_user_id
+            SELECT
+                claimed.id,
+                claimed.agent_version_id,
+                version.agent_id,
+                version.version_number,
+                claimed.environment,
+                claimed.strategy,
+                version.model_config,
+                version.prompt_template,
+                version.runtime_config,
+                version.tool_config,
+                claimed.requested_by_user_id
+            FROM claimed_deployment AS claimed
+            JOIN agent_versions AS version
+                ON version.id = claimed.agent_version_id
             """
         )
 
@@ -59,8 +82,14 @@ class DeploymentRepository:
         return ClaimedDeployment(
             id=row["id"],
             agent_version_id=row["agent_version_id"],
+            agent_id=row["agent_id"],
+            version_number=row["version_number"],
             environment=row["environment"],
             strategy=row["strategy"],
+            model_config=row["model_config"],
+            prompt_template=row["prompt_template"],
+            runtime_config=row["runtime_config"],
+            tool_config=row["tool_config"],
             requested_by_user_id=row["requested_by_user_id"],
         )
 
