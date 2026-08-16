@@ -80,6 +80,31 @@ class AuthService:
             db.rollback()
             raise
 
+    def issue_tokens(
+        self,
+        *,
+        user: User,
+    ) -> TokenResponse:
+        """
+        Issue Zevinq access and refresh tokens for an authenticated user.
+        """
+
+        subject = str(user.id)
+
+        access_token = create_access_token(
+            subject=subject,
+        )
+
+        refresh_token = create_refresh_token(
+            subject=subject,
+        )
+
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+        )
+
+
     def login_user(
         self,
         db: Session,
@@ -95,26 +120,18 @@ class AuthService:
         if user is None:
             raise AuthenticationFailedException()
 
-        if not verify_password(
-            login.password,
-            user.password_hash,
+        if (
+            user.password_hash is None
+            or not verify_password(
+                login.password,
+                user.password_hash,
+            )
         ):
             raise AuthenticationFailedException()
 
         if not user.is_active:
             raise InactiveUserException()
 
-        subject = str(user.id)
-
-        access_token = create_access_token(
-            subject=subject,
-        )
-
-        refresh_token = create_refresh_token(
-            subject=subject,
-        )
-
-        return TokenResponse(
-            access_token=access_token,
-            refresh_token=refresh_token,
+        return self.issue_tokens(
+            user=user,
         )

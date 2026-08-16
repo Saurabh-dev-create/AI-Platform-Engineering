@@ -36,7 +36,7 @@ class UserRepository:
         db: Session,
         *,
         email: str,
-        password_hash: str,
+        password_hash: str | None,
         full_name: str,
     ) -> User:
         user = User(

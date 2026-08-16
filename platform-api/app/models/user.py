@@ -25,9 +25,9 @@ class User(
         nullable=False,
     )
 
-    password_hash: Mapped[str] = mapped_column(
+    password_hash: Mapped[str | None] = mapped_column(
         String(255),
-        nullable=False,
+        nullable=True,
     )
 
     full_name: Mapped[str] = mapped_column(

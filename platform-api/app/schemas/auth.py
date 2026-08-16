@@ -54,3 +54,25 @@ class TokenResponse(BaseModel):
 class AuthenticatedIdentityResponse(BaseModel):
     user_id: str
     token_id: str
+
+
+class OAuthIdentityPreview(BaseModel):
+    provider: str
+    email: EmailStr | None = None
+    email_verified: bool
+    full_name: str | None = None
+    picture_url: str | None = None
+
+
+class OAuthRegisterRequest(BaseModel):
+    continuation_token: str = Field(
+        min_length=1,
+        max_length=512,
+    )
+
+
+class OAuthCallbackResponse(BaseModel):
+    status: str
+    tokens: TokenResponse | None = None
+    continuation_token: str | None = None
+    identity: OAuthIdentityPreview | None = None

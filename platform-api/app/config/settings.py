@@ -192,6 +192,42 @@ class Settings(BaseSettings):
     )
 
     # ------------------------------------------------------------------
+    # External Authentication / OAuth
+    # ------------------------------------------------------------------
+
+    google_oauth_client_id: str | None = Field(
+        default=None,
+        validation_alias="GOOGLE_OAUTH_CLIENT_ID",
+    )
+
+    google_oauth_client_secret: str | None = Field(
+        default=None,
+        validation_alias="GOOGLE_OAUTH_CLIENT_SECRET",
+    )
+
+    google_oauth_redirect_uri: str | None = Field(
+        default=None,
+        validation_alias="GOOGLE_OAUTH_REDIRECT_URI",
+    )
+
+    oauth_state_ttl_seconds: int = Field(
+        default=600,
+        ge=60,
+        le=1800,
+        validation_alias="OAUTH_STATE_TTL_SECONDS",
+    )
+
+    oauth_frontend_success_url: str = Field(
+        default="http://localhost:5173/auth/callback",
+        validation_alias="OAUTH_FRONTEND_SUCCESS_URL",
+    )
+
+    oauth_frontend_error_url: str = Field(
+        default="http://localhost:5173/login",
+        validation_alias="OAUTH_FRONTEND_ERROR_URL",
+    )
+
+    # ------------------------------------------------------------------
     # Platform Security
     # ------------------------------------------------------------------
 
