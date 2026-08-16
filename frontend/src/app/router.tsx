@@ -7,6 +7,7 @@ import { ApprovalsPage } from "../pages/ApprovalsPage";
 import { DashboardPage } from "../pages/DashboardPage";
 import { LandingPage } from "../pages/LandingPage";
 import { LoginPage } from "../pages/LoginPage";
+import { OAuthCallbackPage } from "../pages/OAuthCallbackPage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { ProjectDetailPage } from "../pages/ProjectDetailPage";
 import { ProjectsPage } from "../pages/ProjectsPage";
@@ -32,6 +33,10 @@ export const router = createBrowserRouter([
   {
     path: "/register",
     element: <RegisterPage />,
+  },
+  {
+    path: "/auth/oauth/callback",
+    element: <OAuthCallbackPage />,
   },
   {
     element: <ProtectedRoute />,

@@ -1,3 +1,4 @@
+import { env } from "../../config/env";
 import { apiRequest } from "../../services/api-client";
 
 
@@ -66,6 +67,66 @@ export async function register(
     {
       method: "POST",
       body: JSON.stringify(registration),
+    },
+  );
+}
+
+
+export function startGoogleLogin(): void {
+  window.location.assign(
+    `${env.apiBaseUrl}/auth/oauth/google/start`,
+  );
+}
+
+
+export interface OAuthIdentityPreview {
+  provider: string;
+  email: string | null;
+  email_verified: boolean;
+  full_name: string | null;
+  picture_url: string | null;
+}
+
+
+export interface OAuthHandoffResponse {
+  status:
+    | "authenticated"
+    | "registration_required";
+
+  tokens: TokenResponse | null;
+
+  continuation_token: string | null;
+
+  identity: OAuthIdentityPreview | null;
+}
+
+
+export async function consumeOAuthHandoff(
+  code: string,
+): Promise<OAuthHandoffResponse> {
+  return apiRequest<OAuthHandoffResponse>(
+    "/auth/oauth/handoff",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        code,
+      }),
+    },
+  );
+}
+
+
+export async function registerOAuthUser(
+  continuationToken: string,
+): Promise<OAuthHandoffResponse> {
+  return apiRequest<OAuthHandoffResponse>(
+    "/auth/oauth/register",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        continuation_token:
+          continuationToken,
+      }),
     },
   );
 }

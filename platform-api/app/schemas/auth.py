@@ -76,3 +76,19 @@ class OAuthCallbackResponse(BaseModel):
     tokens: TokenResponse | None = None
     continuation_token: str | None = None
     identity: OAuthIdentityPreview | None = None
+
+
+class OAuthHandoffRequest(BaseModel):
+    code: str = Field(
+        min_length=1,
+        max_length=512,
+    )
+
+
+class OAuthHandoffResponse(BaseModel):
+    status: str
+
+    tokens: TokenResponse | None = None
+    continuation_token: str | None = None
+
+    identity: OAuthIdentityPreview | None = None

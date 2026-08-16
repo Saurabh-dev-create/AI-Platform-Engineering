@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   getCurrentUser,
   login,
+  startGoogleLogin,
 } from "../features/auth/auth-service";
 import {
   clearAccessToken,
@@ -148,6 +149,19 @@ export function LoginPage() {
             <p>
               Access your AI agent platform workspace.
             </p>
+          </div>
+
+          <button
+            type="button"
+            className="oauth-login-button"
+            onClick={startGoogleLogin}
+            disabled={isSubmitting}
+          >
+            Continue with Google
+          </button>
+
+          <div className="oauth-divider">
+            <span>or continue with email</span>
           </div>
 
           <form

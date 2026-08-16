@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.dependencies import get_current_user
 from app.clients.google_oauth_client import GoogleOAuthClient
+from app.config.settings import settings
 from app.dependencies.database import get_db_session
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
@@ -20,6 +21,8 @@ from app.repositories.team_repository import TeamRepository
 from app.schemas.auth import (
     LoginRequest,
     OAuthCallbackResponse,
+    OAuthHandoffRequest,
+    OAuthHandoffResponse,
     OAuthIdentityPreview,
     OAuthRegisterRequest,
     RegisterRequest,
@@ -30,6 +33,10 @@ from app.services.auth_service import AuthService
 from app.services.entitlement_service import EntitlementService
 from app.services.oauth_authentication_service import (
     OAuthAuthenticationService,
+)
+from app.services.oauth_browser_handoff_service import (
+    OAuthBrowserHandoff,
+    OAuthBrowserHandoffService,
 )
 from app.services.oauth_pending_identity_service import (
     OAuthPendingIdentityService,
@@ -92,13 +99,13 @@ def start_google_login() -> RedirectResponse:
 
 @router.get(
     "/oauth/google/callback",
-    response_model=OAuthCallbackResponse,
+    response_class=RedirectResponse,
 )
 def google_oauth_callback(
     code: str,
     state: str,
     db: Session = Depends(get_db_session),
-) -> OAuthCallbackResponse:
+) -> RedirectResponse:
     oauth_service = OAuthAuthenticationService()
 
     result = oauth_service.authenticate_google_callback(
@@ -107,6 +114,8 @@ def google_oauth_callback(
         state=state,
     )
 
+    handoff_service = OAuthBrowserHandoffService()
+
     if result.is_new_identity:
         pending_service = OAuthPendingIdentityService()
 
@@ -114,10 +123,10 @@ def google_oauth_callback(
             identity=result.external_identity,
         )
 
-        return OAuthCallbackResponse(
-            status="link_or_register_required",
-            continuation_token=continuation_token,
-            identity=OAuthIdentityPreview(
+        handoff_code = handoff_service.create(
+            handoff=OAuthBrowserHandoff(
+                status="registration_required",
+                continuation_token=continuation_token,
                 provider=(
                     result.external_identity.provider
                 ),
@@ -131,27 +140,99 @@ def google_oauth_callback(
                 picture_url=(
                     result.external_identity.picture_url
                 ),
+            )
+        )
+
+    else:
+        if result.user is None:
+            raise RuntimeError(
+                "OAuth authentication returned no user"
+            )
+
+        auth_service = AuthService(
+            UserRepository(),
+        )
+
+        tokens = auth_service.issue_tokens(
+            user=result.user,
+        )
+
+        db.commit()
+
+        handoff_code = handoff_service.create(
+            handoff=OAuthBrowserHandoff(
+                status="authenticated",
+                access_token=tokens.access_token,
+                refresh_token=tokens.refresh_token,
+            )
+        )
+
+    redirect_url = (
+        f"{settings.oauth_frontend_success_url}"
+        f"?code={handoff_code}"
+    )
+
+    return RedirectResponse(
+        url=redirect_url,
+        status_code=303,
+        headers={
+            "Cache-Control": "no-store",
+        },
+    )
+
+
+@router.post(
+    "/oauth/handoff",
+    response_model=OAuthHandoffResponse,
+)
+def consume_oauth_handoff(
+    request: OAuthHandoffRequest,
+) -> OAuthHandoffResponse:
+    service = OAuthBrowserHandoffService()
+
+    handoff = service.consume(
+        code=request.code,
+    )
+
+    if handoff.status == "authenticated":
+        if (
+            not handoff.access_token
+            or not handoff.refresh_token
+        ):
+            raise RuntimeError(
+                "Authenticated OAuth handoff is incomplete"
+            )
+
+        return OAuthHandoffResponse(
+            status="authenticated",
+            tokens=TokenResponse(
+                access_token=handoff.access_token,
+                refresh_token=handoff.refresh_token,
             ),
         )
 
-    if result.user is None:
-        raise RuntimeError(
-            "OAuth authentication returned no user"
+    if handoff.status == "registration_required":
+        if not handoff.continuation_token:
+            raise RuntimeError(
+                "Registration OAuth handoff is incomplete"
+            )
+
+        return OAuthHandoffResponse(
+            status="registration_required",
+            continuation_token=(
+                handoff.continuation_token
+            ),
+            identity=OAuthIdentityPreview(
+                provider=handoff.provider or "",
+                email=handoff.email,
+                email_verified=handoff.email_verified,
+                full_name=handoff.full_name,
+                picture_url=handoff.picture_url,
+            ),
         )
 
-    auth_service = AuthService(
-        UserRepository(),
-    )
-
-    tokens = auth_service.issue_tokens(
-        user=result.user,
-    )
-
-    db.commit()
-
-    return OAuthCallbackResponse(
-        status="authenticated",
-        tokens=tokens,
+    raise RuntimeError(
+        "Unsupported OAuth handoff status"
     )
 
 

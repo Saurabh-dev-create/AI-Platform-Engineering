@@ -1,4 +1,5 @@
 import base64
+import logging
 from dataclasses import dataclass
 import hashlib
 import secrets
@@ -11,6 +12,9 @@ from jwt import PyJWKClient
 from app.config.settings import settings
 from app.core.exceptions import PlatformException
 from app.services.oauth_provider import ExternalIdentity
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -212,6 +216,14 @@ class GoogleOAuthClient:
                 },
             )
         except jwt.PyJWTError as exc:
+            logger.warning(
+                "google_id_token_validation_failed "
+                "exception_type=%s "
+                "reason=%s",
+                type(exc).__name__,
+                str(exc),
+            )
+
             raise PlatformException(
                 message="Google identity token is invalid",
                 error_code="GOOGLE_ID_TOKEN_INVALID",
