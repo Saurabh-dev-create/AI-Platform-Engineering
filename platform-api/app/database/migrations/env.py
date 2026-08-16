@@ -10,6 +10,7 @@ from app.models.team import Team  # noqa: E402, F401
 from app.models.team_entitlement import TeamEntitlement  # noqa: E402, F401
 from app.models.team_membership import TeamMembership  # noqa: E402, F401
 from app.models.user import User  # noqa: E402, F401
+from app.models.user_identity import UserIdentity  # noqa: E402, F401
 from app.models.agent import Agent  # noqa: F401
 from app.models.agent_version import AgentVersion  # noqa: E402, F401
 from app.models.deployment import Deployment  # noqa: E402, F401
