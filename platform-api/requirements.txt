@@ -20,7 +20,7 @@ alembic==1.18.5
 redis==7.3.0
 
 # Authentication & Security
-PyJWT==2.10.1
+PyJWT[crypto]==2.10.1
 pwdlib[argon2]==0.3.0
 python-multipart==0.0.22
 

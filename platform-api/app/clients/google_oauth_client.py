@@ -1,10 +1,10 @@
 import base64
-import logging
 from dataclasses import dataclass
 import hashlib
 import secrets
 from urllib.parse import urlencode
 
+import structlog
 import httpx
 import jwt
 from jwt import PyJWKClient
@@ -14,7 +14,7 @@ from app.core.exceptions import PlatformException
 from app.services.oauth_provider import ExternalIdentity
 
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 @dataclass(frozen=True)
@@ -217,11 +217,9 @@ class GoogleOAuthClient:
             )
         except jwt.PyJWTError as exc:
             logger.warning(
-                "google_id_token_validation_failed "
-                "exception_type=%s "
-                "reason=%s",
-                type(exc).__name__,
-                str(exc),
+                "google_id_token_validation_failed",
+                exception_type=type(exc).__name__,
+                reason=str(exc),
             )
 
             raise PlatformException(
