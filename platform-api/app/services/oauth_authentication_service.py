@@ -20,6 +20,8 @@ class OAuthAuthenticationResult:
     identity: UserIdentity | None
     external_identity: ExternalIdentity
     is_new_identity: bool
+    transaction_mode: str
+    transaction_user_id: str | None
 
 
 class OAuthAuthenticationService:
@@ -101,6 +103,8 @@ class OAuthAuthenticationService:
                 identity=None,
                 external_identity=external_identity,
                 is_new_identity=True,
+                transaction_mode=transaction.mode,
+                transaction_user_id=transaction.user_id,
             )
 
         user = self.user_repository.get_by_id(
@@ -134,4 +138,6 @@ class OAuthAuthenticationService:
             identity=identity,
             external_identity=external_identity,
             is_new_identity=False,
+            transaction_mode=transaction.mode,
+            transaction_user_id=transaction.user_id,
         )

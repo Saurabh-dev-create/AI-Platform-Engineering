@@ -68,11 +68,24 @@ export function OAuthCallbackPage() {
     );
 
     async function completeOAuth() {
-      clearAccessToken();
-
       try {
         const handoff =
           await consumeOAuthHandoff(code!);
+
+        if (handoff.status === "linked") {
+          setMessage(
+            "Google account connected successfully.",
+          );
+
+          navigate(
+            "/app/profile/account",
+            {
+              replace: true,
+            },
+          );
+
+          return;
+        }
 
         let tokens = handoff.tokens;
 
@@ -131,6 +144,8 @@ export function OAuthCallbackPage() {
           tokens.access_token,
         );
 
+        clearAccessToken();
+
         setAccessToken(
           tokens.access_token,
         );
@@ -142,8 +157,6 @@ export function OAuthCallbackPage() {
           },
         );
       } catch (error) {
-        clearAccessToken();
-
         setState("error");
 
         if (error instanceof ApiError) {

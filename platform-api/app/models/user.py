@@ -47,6 +47,10 @@ class User(
         nullable=False,
     )
 
+    @property
+    def has_password(self) -> bool:
+        return self.password_hash is not None
+
     def __repr__(self) -> str:
         return (
             f"<User "

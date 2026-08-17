@@ -21,6 +21,7 @@ export interface CurrentUser {
   full_name: string;
   is_active: boolean;
   is_platform_admin: boolean;
+  has_password: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -91,7 +92,8 @@ export interface OAuthIdentityPreview {
 export interface OAuthHandoffResponse {
   status:
     | "authenticated"
-    | "registration_required";
+    | "registration_required"
+    | "linked";
 
   tokens: TokenResponse | null;
 
@@ -128,5 +130,49 @@ export async function registerOAuthUser(
           continuationToken,
       }),
     },
+  );
+}
+
+
+export interface LinkedIdentity {
+  id: string;
+  provider: string;
+  provider_email: string | null;
+  provider_email_verified: boolean;
+  last_login_at: string | null;
+}
+
+
+export async function getLinkedIdentities(
+  accessToken: string,
+): Promise<LinkedIdentity[]> {
+  return apiRequest<LinkedIdentity[]>(
+    "/auth/identities",
+    {
+      method: "GET",
+      accessToken,
+    },
+  );
+}
+
+
+export interface OAuthStartResponse {
+  authorization_url: string;
+}
+
+
+export async function startGoogleLink(
+  accessToken: string,
+): Promise<void> {
+  const result = await apiRequest<OAuthStartResponse>(
+    "/auth/oauth/google/link/start",
+    {
+      method: "POST",
+      accessToken,
+    },
+  );
+
+  window.location.assign(
+    result.authorization_url,
   );
 }

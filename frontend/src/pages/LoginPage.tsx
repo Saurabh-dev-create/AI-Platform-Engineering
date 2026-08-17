@@ -4,6 +4,7 @@ import {
 } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { GoogleIcon } from "../components/auth/GoogleIcon";
 import {
   getCurrentUser,
   login,
@@ -157,7 +158,8 @@ export function LoginPage() {
             onClick={startGoogleLogin}
             disabled={isSubmitting}
           >
-            Continue with Google
+            <GoogleIcon />
+            <span>Continue with Google</span>
           </button>
 
           <div className="oauth-divider">

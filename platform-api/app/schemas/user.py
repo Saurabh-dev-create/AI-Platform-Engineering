@@ -12,5 +12,6 @@ class UserResponse(BaseModel):
     full_name: str
     is_active: bool
     is_platform_admin: bool
+    has_password: bool
     created_at: datetime
     updated_at: datetime

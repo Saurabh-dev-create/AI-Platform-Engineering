@@ -24,6 +24,7 @@ class OAuthTransaction:
     code_verifier: str
     mode: OAuthMode
     created_at: str
+    user_id: str | None = None
 
 
 class OAuthTransactionService:
@@ -51,6 +52,7 @@ class OAuthTransactionService:
         *,
         provider: str,
         mode: OAuthMode = "login",
+        user_id: str | None = None,
     ) -> tuple[str, OAuthTransaction]:
         """
         Create a new OAuth state and nonce pair.
@@ -66,6 +68,7 @@ class OAuthTransactionService:
             code_verifier=code_verifier,
             mode=mode,
             created_at=datetime.now(UTC).isoformat(),
+            user_id=user_id,
         )
 
         key = self._key(state)
@@ -132,6 +135,7 @@ class OAuthTransactionService:
                 code_verifier=data["code_verifier"],
                 mode=data["mode"],
                 created_at=data["created_at"],
+                user_id=data.get("user_id"),
             )
         except (
             KeyError,

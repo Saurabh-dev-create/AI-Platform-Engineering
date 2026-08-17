@@ -2,6 +2,7 @@ import { Navigate, createBrowserRouter } from "react-router-dom";
 
 import { ProtectedRoute } from "../features/auth/ProtectedRoute";
 import { AppLayout } from "../layouts/AppLayout";
+import { AccountSettingsPage } from "../pages/AccountSettingsPage";
 import { AgentDetailPage } from "../pages/AgentDetailPage";
 import { ApprovalsPage } from "../pages/ApprovalsPage";
 import { DashboardPage } from "../pages/DashboardPage";
@@ -92,6 +93,10 @@ export const router = createBrowserRouter([
           {
             path: "marketplace",
             element: <MarketplacePage />,
+          },
+          {
+            path: "profile/account",
+            element: <AccountSettingsPage />,
           },
         ],
       },

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import (
     BaseModel,
     EmailStr,
@@ -62,6 +64,18 @@ class OAuthIdentityPreview(BaseModel):
     email_verified: bool
     full_name: str | None = None
     picture_url: str | None = None
+
+
+class LinkedIdentityResponse(BaseModel):
+    id: str
+    provider: str
+    provider_email: str | None = None
+    provider_email_verified: bool
+    last_login_at: datetime | None = None
+
+
+class OAuthStartResponse(BaseModel):
+    authorization_url: str
 
 
 class OAuthRegisterRequest(BaseModel):

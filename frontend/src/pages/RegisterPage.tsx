@@ -7,10 +7,12 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+import { GoogleIcon } from "../components/auth/GoogleIcon";
 import {
   getCurrentUser,
   login,
   register,
+  startGoogleLogin,
 } from "../features/auth/auth-service";
 import {
   clearAccessToken,
@@ -162,6 +164,20 @@ export function RegisterPage() {
               Get started with the Zevinq AI Agent
               Control Plane.
             </p>
+          </div>
+
+          <button
+            type="button"
+            className="oauth-login-button"
+            onClick={startGoogleLogin}
+            disabled={isSubmitting}
+          >
+            <GoogleIcon />
+            <span>Continue with Google</span>
+          </button>
+
+          <div className="oauth-divider">
+            <span>or continue with email</span>
           </div>
 
           <form

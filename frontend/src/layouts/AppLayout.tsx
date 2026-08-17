@@ -115,9 +115,17 @@ export function AppLayout() {
               Logout
             </button>
 
-            <div className="user-avatar">
+            <button
+              type="button"
+              className="user-avatar user-avatar-button"
+              onClick={() =>
+                navigate("/app/profile/account")
+              }
+              aria-label="Open profile settings"
+              title="Profile"
+            >
               ZL
-            </div>
+            </button>
           </div>
         </header>
 

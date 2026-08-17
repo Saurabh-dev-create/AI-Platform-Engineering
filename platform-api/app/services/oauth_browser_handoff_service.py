@@ -12,6 +12,7 @@ from app.core.exceptions import PlatformException
 OAuthHandoffStatus = Literal[
     "authenticated",
     "registration_required",
+    "linked",
 ]
 
 
